@@ -15,7 +15,7 @@ public class NewsLoader extends AsyncTaskLoader<List<News>> {
     /**
      * Query URL
      */
-    private String mUrl;
+    private final String mUrl;
 
     /**
      * Constructs a new {@link NewsLoader}.
@@ -41,7 +41,6 @@ public class NewsLoader extends AsyncTaskLoader<List<News>> {
         if (mUrl == null) {
             return null;
         }
-        List<News> news = QueryUtils.fetchNewsData(mUrl);
-        return news;
+        return QueryUtils.fetchNewsData(mUrl);
     }
 }

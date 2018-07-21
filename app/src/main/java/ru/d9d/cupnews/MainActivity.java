@@ -26,9 +26,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<News>> {
 
     // Default url (news source)
-    private String API_URL = "https://content.guardianapis.com/search?q=world%20cup&from-date=2018-06-01&show-tags=contributor&api-key=5f3c6fa6-d477-41f4-a41a-87858c3d06a7";
+    private final String API_URL = "https://content.guardianapis.com/search";
+    private final String API_KEY = "5f3c6fa6-d477-41f4-a41a-87858c3d06a7";
 
-    public static final String LOG_TAG = MainActivity.class.getName();
+    private static final String LOG_TAG = MainActivity.class.getName();
 
     private static final int LOADER_ID = 1;
 
@@ -47,14 +48,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_activity);
 
         // Set empty state TextView view object
-        mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
-        mLoadingProgress = (ProgressBar) findViewById(R.id.loading_progress);
+        mEmptyStateTextView = findViewById(R.id.empty_view);
+        mLoadingProgress = findViewById(R.id.loading_progress);
 
         // Find a reference to the {@link ListView} in the layout
-        ListView newsListView = (ListView) findViewById(R.id.list);
+        ListView newsListView = findViewById(R.id.list);
 
         // Create a new adapter that takes an empty list of news as input
         mAdapter = new NewsAdapter(this, new ArrayList<News>());
@@ -70,14 +71,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
                 News currentNews = mAdapter.getItem(position);
+                if (currentNews.isValid()) {
 
-                // Convert the String URL into a URI object (to pass into the Intent constructor)
-                Uri newsUri = Uri.parse(currentNews.getUrl());
+                    // Convert the String URL into a URI object (to pass into the Intent constructor)
+                    Uri newsUri = Uri.parse(currentNews.getUrl());
 
-                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, newsUri);
+                    Intent websiteIntent = new Intent(Intent.ACTION_VIEW, newsUri);
 
-                // Send the intent to launch a new activity
-                startActivity(websiteIntent);
+                    // Send the intent to launch a new activity
+                    startActivity(websiteIntent);
+                }
             }
         });
 
@@ -100,10 +103,63 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
+    // This method initialize the contents of the Activity's options menu.
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the Options Menu we specified in XML
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     // onCreateLoader instantiates and returns a new Loader for the given ID
     public Loader<List<News>> onCreateLoader(int i, Bundle bundle) {
 
-        return new NewsLoader(this, API_URL);
+        //https://content.guardianapis.com/search?
+        // q=world%20cup
+        // &from-date=2018-06-01
+        // &show-tags=contributor
+        // &api-key=5f3c6fa6-d477-41f4-a41a-87858c3d06a7
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String queryText = sharedPrefs.getString(
+                getString(R.string.settings_query_key),
+                getString(R.string.settings_query_default));
+
+        String startDate = sharedPrefs.getString(
+                getString(R.string.settings_date_key),
+                getString(R.string.settings_date_default));
+
+        String orderBy = sharedPrefs.getString(
+                getString(R.string.settings_order_by_key),
+                getString(R.string.settings_order_by_default));
+
+        // parse breaks apart the URI string that's passed into its parameter
+        Uri baseUri = Uri.parse(API_URL);
+
+        // buildUpon prepares the baseUri that we just parsed so we can add query parameters to it
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+
+        // Append query parameter and its value.
+        uriBuilder.appendQueryParameter("api-key", API_KEY); // API key
+        uriBuilder.appendQueryParameter("q", queryText); // Query text for content search
+        uriBuilder.appendQueryParameter("from-date", startDate); // Starting publishing date
+        uriBuilder.appendQueryParameter("order-by", orderBy); // Order by relevance or date
+        uriBuilder.appendQueryParameter("show-tags", "contributor"); // Parameter to show contributor
+
+
+        return new NewsLoader(this, uriBuilder.toString());
 
     }
 

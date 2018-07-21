@@ -45,4 +45,8 @@ public class News {
     public String getUrl() {
         return mUrl;
     }
+
+    public boolean isValid() {
+        return mTitle != null && mUrl != null;
+    }
 }

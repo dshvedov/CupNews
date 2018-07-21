@@ -1,17 +1,12 @@
 package ru.d9d.cupnews;
 
 import android.app.Activity;
-import android.graphics.drawable.GradientDrawable;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -52,9 +47,9 @@ public class NewsAdapter extends ArrayAdapter<News> {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
 
-        TextView tvDate = (TextView) listItemView.findViewById(R.id.date);
+        TextView tvDate = listItemView.findViewById(R.id.date);
         tvDate.setText(dateFormatter.format(date));
-        TextView tvTime = (TextView) listItemView.findViewById(R.id.time);
+        TextView tvTime = listItemView.findViewById(R.id.time);
         tvTime.setText(timeFormatter.format(date));
 
         return listItemView;

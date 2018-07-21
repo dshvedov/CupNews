@@ -23,6 +23,9 @@ import java.util.List;
 public final class QueryUtils {
 
     private static final String LOG_TAG = "QueryUtils";
+    private static final int HTTP_CONNECTION_READ_TIMEOUT = 10000; /* milliseconds */
+    private static final int HTTP_CONNECTION_CONNECT_TIMEOUT = 15000; /* milliseconds */
+
 
     private QueryUtils() {
     }
@@ -55,7 +58,7 @@ public final class QueryUtils {
                 // Get publication date
                 String newsDateStr = newsObj.getString("webPublicationDate");
                 SimpleDateFormat guardianDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                Date date = (Date) guardianDateFormat.parse(newsDateStr);
+                Date date = guardianDateFormat.parse(newsDateStr);
                 String newsTitle = newsObj.getString("webTitle");
                 String newsUrl = newsObj.getString("webUrl");
                 String section = newsObj.getString("sectionName");
@@ -69,7 +72,7 @@ public final class QueryUtils {
 
         } catch (JSONException e) {
             // Print a log message with the message from the exception.
-            Log.e(LOG_TAG, "Problem parsing the earthquake JSON results", e);
+            Log.e(LOG_TAG, "Problem parsing news JSON results", e);
         } catch (ParseException e) {
             Log.e(LOG_TAG, "Problem parsing date", e);
         }
@@ -106,8 +109,8 @@ public final class QueryUtils {
         InputStream inputStream = null;
         try {
             urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(10000 /* milliseconds */);
-            urlConnection.setConnectTimeout(15000 /* milliseconds */);
+            urlConnection.setReadTimeout(HTTP_CONNECTION_READ_TIMEOUT);
+            urlConnection.setConnectTimeout(HTTP_CONNECTION_CONNECT_TIMEOUT);
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
@@ -120,7 +123,7 @@ public final class QueryUtils {
                 Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
             }
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Problem retrieving the earthquake JSON results.", e);
+            Log.e(LOG_TAG, "Problem retrieving news JSON results.", e);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
